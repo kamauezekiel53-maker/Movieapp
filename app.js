@@ -1,7 +1,11 @@
-const APP_VERSION = '1.0.0';
-localStorage.setItem('moviehub_version', APP_VERSION);
+const APP_VERSION = '2.0.0';
+const storedVersion = localStorage.getItem('moviehub_version') || '1.0.0';
+if(storedVersion !== APP_VERSION){
+    // Migration logic if needed
+    localStorage.setItem('moviehub_version', APP_VERSION);
+}
 
-const API_KEY = '7cc9abef50e4c94689f48516718607be'; // Replace with your TMDb key
+const API_KEY = '7cc9abef50e4c94689f48516718607be';
 const IMG_URL = 'https://image.tmdb.org/t/p/w500';
 
 const moviesContainer = document.getElementById('movies');
@@ -9,6 +13,7 @@ const searchInput = document.getElementById('search');
 const modal = document.getElementById('modal');
 const modalBody = document.getElementById('modal-body');
 const closeModal = document.getElementById('close');
+const viewFavoritesBtn = document.getElementById('view-favorites');
 
 let favorites = JSON.parse(localStorage.getItem('moviehub_favorites')) || [];
 
@@ -22,7 +27,7 @@ async function fetchMovies(query=''){
     displayMovies(data.results);
 }
 
-// Display movies in grid
+// Display movies
 function displayMovies(movies){
     moviesContainer.innerHTML = '';
     if(!movies || movies.length === 0){
@@ -64,7 +69,7 @@ async function openModal(movieId){
     modal.style.display = 'flex';
 }
 
-// Add movie to favorites
+// Add favorite
 function addFavorite(id){
     if(!favorites.includes(id)){
         favorites.push(id);
@@ -73,14 +78,32 @@ function addFavorite(id){
     } else alert('Already in favorites!');
 }
 
+// Display favorites
+function showFavorites(){
+    if(favorites.length === 0){
+        moviesContainer.innerHTML = '<p style="grid-column:1/-1;text-align:center;">No favorites yet</p>';
+        return;
+    }
+    const favoriteMovies = favorites.map(async id => {
+        const res = await fetch(`https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}`);
+        return res.json();
+    });
+    Promise.all(favoriteMovies).then(data => displayMovies(data));
+}
+
 // Close modal
 closeModal.addEventListener('click', () => modal.style.display = 'none');
 window.addEventListener('click', e => { if(e.target == modal) modal.style.display = 'none'; });
 
-// Search functionality
+// Search functionality (Enter to search)
 searchInput.addEventListener('keyup', e => {
-    fetchMovies(e.target.value.trim());
+    if(e.key === 'Enter'){
+        fetchMovies(e.target.value.trim());
+    }
 });
+
+// Favorites button
+viewFavoritesBtn.addEventListener('click', showFavorites);
 
 // Initial load
 fetchMovies();
