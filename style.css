@@ -1,3 +1,4 @@
+/* General Body */
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -5,10 +6,14 @@ body {
     color: #fff;
 }
 
+/* Header */
 header {
     padding: 20px;
     text-align: center;
     background: #141414;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 header h1 {
@@ -17,6 +22,7 @@ header h1 {
     color: #ff3b3b;
 }
 
+/* Search Bar */
 .search-bar {
     text-align: center;
     margin: 20px 0;
@@ -29,6 +35,7 @@ header h1 {
     border: none;
 }
 
+/* Movies Grid */
 .movies {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -70,11 +77,14 @@ header h1 {
     opacity: 1;
 }
 
+/* Modal */
 .modal {
     display: none;
     position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: rgba(0,0,0,0.95);
     align-items: center;
     justify-content: center;
@@ -102,12 +112,14 @@ header h1 {
     color: #ff3b3b;
 }
 
+/* Videos / Trailers */
 video, iframe {
     width: 100%;
     margin-top: 10px;
     border-radius: 10px;
 }
 
+/* Buttons */
 .favorite-btn {
     margin-top: 10px;
     padding: 5px 10px;
@@ -116,4 +128,14 @@ video, iframe {
     border-radius: 5px;
     cursor: pointer;
     color: #fff;
+}
+
+/* Responsive for Mobile */
+@media (max-width: 500px) {
+    .search-bar input {
+        width: 90%;
+    }
+    .movies {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    }
 }
