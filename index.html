@@ -3,71 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MovieHub</title>
+<title>MovieHub Enhanced</title>
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background-color: #0a0a0a;
-    color: #fff;
-  }
-  header {
-    padding: 20px;
-    text-align: center;
-    background-color: #141414;
-  }
-  header h1 {
-    margin: 0;
-    font-size: 2em;
-    color: #ff3b3b;
-  }
-  .search-bar {
-    text-align: center;
-    margin: 20px 0;
-  }
-  .search-bar input {
-    padding: 10px;
-    width: 300px;
-    border-radius: 5px;
-    border: none;
-  }
-  .movies {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 20px;
-    padding: 20px;
-  }
-  .movie {
-    background-color: #141414;
-    border-radius: 10px;
-    overflow: hidden;
-    transition: transform 0.3s;
-  }
-  .movie:hover {
-    transform: scale(1.05);
-  }
-  .movie img {
-    width: 100%;
-    display: block;
-  }
-  .movie-info {
-    padding: 10px;
-  }
-  .movie-info h3 {
-    margin: 0 0 5px;
-    font-size: 1em;
-  }
-  .movie-info p {
-    margin: 0;
-    font-size: 0.9em;
-    color: #9aa0a6;
-  }
+  body { margin:0; font-family:Arial,sans-serif; background:#0a0a0a; color:#fff; }
+  header { padding:20px; text-align:center; background:#141414; }
+  header h1 { margin:0; font-size:2em; color:#ff3b3b; }
+  .search-bar { text-align:center; margin:20px 0; }
+  .search-bar input { padding:10px; width:300px; border-radius:5px; border:none; }
+  .movies { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:20px; padding:20px; }
+  .movie { background:#141414; border-radius:10px; overflow:hidden; transition:transform 0.3s; cursor:pointer; position:relative; }
+  .movie:hover { transform:scale(1.05); }
+  .movie img { width:100%; display:block; }
+  .movie-info { padding:10px; }
+  .movie-info h3 { margin:0 0 5px; font-size:1em; }
+  .movie-info p { margin:0; font-size:0.9em; color:#9aa0a6; }
+  .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:flex; align-items:center; justify-content:center; display:none; z-index:1000; padding:20px; }
+  .modal-content { background:#141414; border-radius:10px; padding:20px; max-width:800px; width:100%; max-height:90%; overflow-y:auto; position:relative; }
+  .close { position:absolute; top:10px; right:20px; font-size:1.5em; cursor:pointer; color:#ff3b3b; }
+  .favorite-btn { margin-top:10px; padding:5px 10px; background:#ff3b3b; border:none; border-radius:5px; cursor:pointer; color:#fff; }
+  .favorites-list { padding:20px; }
+  .favorites-list h2 { margin-bottom:10px; color:#ff3b3b; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🎬 MovieHub</h1>
+  <h1>🎬 MovieHub Enhanced</h1>
 </header>
 
 <div class="search-bar">
@@ -76,13 +37,33 @@
 
 <div class="movies" id="movies"></div>
 
+<div class="favorites-list" id="favorites-list">
+  <h2>Favorites</h2>
+  <div id="favorites"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modal-content" id="modal-content">
+    <span class="close" id="close">&times;</span>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
 <script>
-const API_KEY = '7cc9abef50e4c94689f48516718607be';
+const API_KEY = 'YOUR_TMDB_API_KEY';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+
 const moviesContainer = document.getElementById('movies');
 const searchInput = document.getElementById('search');
+const modal = document.getElementById('modal');
+const modalBody = document.getElementById('modal-body');
+const closeModal = document.getElementById('close');
+const favoritesContainer = document.getElementById('favorites');
 
+let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+// Fetch movies
 async function fetchMovies(query = 'popular') {
   let url;
   if (query === 'popular') {
@@ -95,6 +76,7 @@ async function fetchMovies(query = 'popular') {
   displayMovies(data.results);
 }
 
+// Display movies
 function displayMovies(movies) {
   moviesContainer.innerHTML = '';
   if (!movies || movies.length === 0) {
@@ -111,21 +93,65 @@ function displayMovies(movies) {
         <p>⭐ ${movie.vote_average} | ${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</p>
       </div>
     `;
+    movieEl.addEventListener('click', () => openModal(movie.id));
     moviesContainer.appendChild(movieEl);
   });
 }
 
-// Initial fetch
+// Open modal with details & trailer
+async function openModal(id) {
+  const res = await fetch(`${BASE_URL}/movie/${id}?api_key=${API_KEY}&append_to_response=videos`);
+  const movie = await res.json();
+  const trailer = movie.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+  modalBody.innerHTML = `
+    <h2>${movie.title}</h2>
+    <p>⭐ ${movie.vote_average} | ${movie.release_date}</p>
+    <p>${movie.overview}</p>
+    ${trailer ? `<iframe width="100%" height="400" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>` : ''}
+    <button class="favorite-btn" onclick="addFavorite(${movie.id}, '${movie.title}', '${movie.poster_path}')">Add to Favorites</button>
+  `;
+  modal.style.display = 'flex';
+}
+
+closeModal.addEventListener('click', () => modal.style.display = 'none');
+window.addEventListener('click', e => { if(e.target == modal) modal.style.display = 'none'; });
+
+// Favorites
+function addFavorite(id, title, poster) {
+  if(!favorites.some(f => f.id === id)) {
+    favorites.push({id, title, poster});
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    displayFavorites();
+    alert(`${title} added to favorites!`);
+  } else {
+    alert(`${title} is already in favorites.`);
+  }
+}
+
+function displayFavorites() {
+  favoritesContainer.innerHTML = '';
+  favorites.forEach(f => {
+    const favEl = document.createElement('div');
+    favEl.style.display = 'inline-block';
+    favEl.style.marginRight = '10px';
+    favEl.style.textAlign = 'center';
+    favEl.innerHTML = `
+      <img src="${f.poster ? IMG_URL + f.poster : 'https://via.placeholder.com/100x150'}" width="100" />
+      <p style="font-size:0.8em;">${f.title}</p>
+    `;
+    favoritesContainer.appendChild(favEl);
+  });
+}
+
+// Initial fetch & favorites display
 fetchMovies();
+displayFavorites();
 
 // Search functionality
 searchInput.addEventListener('keyup', (e) => {
   const query = e.target.value.trim();
-  if (query.length > 0) {
-    fetchMovies(query);
-  } else {
-    fetchMovies('popular');
-  }
+  if (query.length > 0) fetchMovies(query);
+  else fetchMovies('popular');
 });
 </script>
 
