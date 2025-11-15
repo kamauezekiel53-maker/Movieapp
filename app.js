@@ -1,114 +1,133 @@
 const API_KEY = '7cc9abef50e4c94689f48516718607be';
 const IMG_URL = 'https://image.tmdb.org/t/p/w500';
 
-const movieList = document.getElementById('movieList');
+const moviesRow = document.getElementById('moviesRow');
+const seriesRow = document.getElementById('seriesRow');
+const animeRow = document.getElementById('animeRow');
 const searchInput = document.getElementById('searchInput');
-const movieModal = document.getElementById('movieModal');
+
+const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modalTitle');
-const moviePlayer = document.getElementById('moviePlayer');
+const player = document.getElementById('player');
+const trailerContainer = document.getElementById('trailerContainer');
+const playerButtons = document.getElementById('playerButtons');
+const addFavoriteBtn = document.getElementById('addFavorite');
 const closeModal = document.querySelector('.close');
 
-// Fetch trending movies initially
-async function fetchTrending() {
-    const res = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
-    const data = await res.json();
-    displayMovies(data.results);
+let favorites = JSON.parse(localStorage.getItem('moviehub_favorites')) || [];
+
+// Fetch TMDB data
+async function fetchTMDB(type, category='trending') {
+  let url = '';
+  if(category === 'trending') url = `https://api.themoviedb.org/3/trending/${type}/week?api_key=${API_KEY}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  return data.results;
 }
 
-// Search movies
-async function searchMovies(query) {
-    const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
-    const data = await res.json();
-    displayMovies(data.results);
+// Display horizontal row
+function displayRow(items, container) {
+  container.innerHTML = '';
+  items.forEach(movie => {
+    const div = document.createElement('div');
+    div.className = 'movie';
+    div.innerHTML = `
+      <img src="${IMG_URL + movie.poster_path}" alt="${movie.title || movie.name}">
+      <div class="movie-info">
+        <h4>${movie.title || movie.name}</h4>
+      </div>
+    `;
+    div.onclick = () => openModal(movie);
+    container.appendChild(div);
+  });
 }
 
-// Display movies in grid
-function displayMovies(movies) {
-    movieList.innerHTML = '';
-    if (!movies || movies.length === 0) {
-        movieList.innerHTML = '<p style="grid-column:1/-1;text-align:center;">No movies found</p>';
-        return;
-    }
-    movies.forEach(movie => {
-        const div = document.createElement('div');
-        div.classList.add('movie');
-        div.innerHTML = `
-            <img src="${IMG_URL + movie.poster_path}" alt="${movie.title}">
-            <div class="movie-info">
-                <h3>${movie.title}</h3>
-                <p>${movie.release_date ? movie.release_date.split('-')[0] : ''}</p>
-            </div>
-        `;
-        div.onclick = () => openModal(movie);
-        movieList.appendChild(div);
-    });
-}
-
-// Open modal with trailer + player
+// Modal
 async function openModal(movie) {
-    modalTitle.textContent = movie.title;
-    moviePlayer.src = ''; // Reset player
+  modalTitle.textContent = movie.title || movie.name;
+  player.src = '';
+  trailerContainer.innerHTML = '';
+  playerButtons.innerHTML = '';
 
-    // Fetch trailers
-    const res = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${API_KEY}`);
-    const data = await res.json();
-    const trailer = data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+  // Trailer
+  const res = await fetch(`https://api.themoviedb.org/3/${movie.media_type || 'movie'}/${movie.id}/videos?api_key=${API_KEY}`);
+  const data = await res.json();
+  const trailer = data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+  if(trailer) {
+    trailerContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen></iframe>`;
+  }
 
-    let modalContent = '';
-    if (trailer) {
-        modalContent += `<iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen style="margin-top:10px; height:250px;"></iframe>`;
-    } else {
-        modalContent += '<p>No trailer available</p>';
-    }
+  // Full movie player buttons
+  const tmdbId = movie.id;
+  const providers = ['vidsrc','videoverse','hdmovie'];
+  providers.forEach(p => {
+    const btn = document.createElement('button');
+    btn.textContent = `Play on ${p}`;
+    btn.onclick = () => player.src = getPlayerURL(p, tmdbId);
+    playerButtons.appendChild(btn);
+  });
 
-    // Add full movie player buttons
-    modalContent += `
-        <h3>Play Movie:</h3>
-        <button onclick="playMovie('vidsrc', ${movie.id})">VidSrc</button>
-        <button onclick="playMovie('videoverse', ${movie.id})">VideoVerse</button>
-        <button onclick="playMovie('hdmovie', ${movie.id})">HDMovies</button>
-    `;
-
-    // Inject modal content
-    movieModal.querySelector('.modal-content').innerHTML = `
-        <span class="close">&times;</span>
-        <h2 id="modalTitle">${movie.title}</h2>
-        <iframe id="moviePlayer" allowfullscreen style="margin-top:10px; height:300px;"></iframe>
-        ${modalContent}
-    `;
-
-    // Re-assign close event
-    movieModal.querySelector('.close').onclick = () => {
-        movieModal.style.display = 'none';
-        document.getElementById('moviePlayer').src = '';
-    };
-
-    movieModal.style.display = 'flex';
+  addFavoriteBtn.onclick = () => addFavorite(movie);
+  modal.style.display = 'flex';
 }
 
-// Play movie using selected provider
-function playMovie(provider, tmdbId) {
-    const iframe = document.getElementById('moviePlayer');
-    let urls = {
-        vidsrc: `https://vidsrc.to/embed/movie/${tmdbId}`,
-        videoverse: `https://videoverse.cloud/embed/movie/${tmdbId}`,
-        hdmovie: `https://hidemovies.xyz/embed/${tmdbId}`
-    };
-    iframe.src = urls[provider];
+function getPlayerURL(provider, tmdbId) {
+  if(provider==='vidsrc') return `https://vidsrc.to/embed/movie/${tmdbId}`;
+  if(provider==='videoverse') return `https://videoverse.cloud/embed/movie/${tmdbId}`;
+  if(provider==='hdmovie') return `https://hidemovies.xyz/embed/${tmdbId}`;
 }
 
-// Search on Enter
+// Favorites
+function addFavorite(movie) {
+  if(!favorites.some(f => f.id===movie.id)) {
+    favorites.push(movie);
+    localStorage.setItem('moviehub_favorites', JSON.stringify(favorites));
+    alert('Added to favorites!');
+  } else alert('Already in favorites!');
+}
+
+document.getElementById('viewFavorites').onclick = () => {
+  displayRow(favorites, moviesRow);
+}
+
+// Search
 searchInput.addEventListener('keyup', e => {
-    if (e.key === 'Enter') searchMovies(e.target.value.trim());
+  if(e.key==='Enter') {
+    const query = e.target.value.trim();
+    if(query.length===0) return;
+    searchTMDB(query);
+  }
 });
 
-// Close modal on outside click
-window.addEventListener('click', e => {
-    if (e.target === movieModal) {
-        movieModal.style.display = 'none';
-        moviePlayer.src = '';
-    }
-});
+async function searchTMDB(query) {
+  const res = await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+  const data = await res.json();
+  displayRow(data.results, moviesRow);
+}
+
+// Close modal
+closeModal.onclick = () => {
+  modal.style.display = 'none';
+  player.src = '';
+};
+
+// Click outside modal to close
+window.onclick = e => {
+  if(e.target===modal) {
+    modal.style.display = 'none';
+    player.src = '';
+  }
+};
 
 // Initial load
-fetchTrending();
+async function init() {
+  const movies = await fetchTMDB('movie');
+  displayRow(movies, moviesRow);
+
+  const series = await fetchTMDB('tv');
+  displayRow(series, seriesRow);
+
+  const anime = await fetchTMDB('tv'); // you can filter anime by genre if needed
+  displayRow(anime, animeRow);
+}
+init();
