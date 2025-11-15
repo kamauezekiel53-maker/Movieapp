@@ -1,35 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MovieHub — Simkl Version</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieHub – Full Movies</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header>
-    <h1 class="logo">🎬 MovieHub</h1>
-    <div class="top-controls">
-        <input type="text" id="search" placeholder="Search movies, series, anime...">
-        <button id="view-favorites">Favorites ⭐</button>
-    </div>
+  <h1>🎬 MovieHub</h1>
+  <input type="text" id="searchInput" placeholder="Search movies...">
 </header>
 
-<nav class="tabs">
-    <button class="tab active" data-type="movies">Movies</button>
-    <button class="tab" data-type="series">Series</button>
-    <button class="tab" data-type="anime">Anime</button>
-</nav>
+<div id="movieList" class="movies"></div>
 
-<div id="movies" class="grid"></div>
-
-<!-- MODAL -->
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <span id="close">&times;</span>
-        <div id="modal-body"></div>
-    </div>
+<!-- Movie Modal -->
+<div id="movieModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2 id="modalTitle"></h2>
+    <iframe id="moviePlayer" allowfullscreen></iframe>
+  </div>
 </div>
 
 <script src="app.js"></script>
