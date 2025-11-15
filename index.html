@@ -1,12 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MovieHub</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MovieHub</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #0a0a0a;
+    color: #fff;
+  }
+  header {
+    padding: 20px;
+    text-align: center;
+    background-color: #141414;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 2em;
+    color: #ff3b3b;
+  }
+  .search-bar {
+    text-align: center;
+    margin: 20px 0;
+  }
+  .search-bar input {
+    padding: 10px;
+    width: 300px;
+    border-radius: 5px;
+    border: none;
+  }
+  .movies {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+  .movie {
+    background-color: #141414;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.3s;
+  }
+  .movie:hover {
+    transform: scale(1.05);
+  }
+  .movie img {
+    width: 100%;
+    display: block;
+  }
+  .movie-info {
+    padding: 10px;
+  }
+  .movie-info h3 {
+    margin: 0 0 5px;
+    font-size: 1em;
+  }
+  .movie-info p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #9aa0a6;
+  }
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="../src/App.jsx"></script>
+
+<header>
+  <h1>🎬 MovieHub</h1>
+</header>
+
+<div class="search-bar">
+  <input type="text" id="search" placeholder="Search for a movie..." />
+</div>
+
+<div class="movies" id="movies"></div>
+
+<script>
+const API_KEY = '7cc9abef50e4c94689f48516718607be';
+const BASE_URL = 'https://api.themoviedb.org/3';
+const IMG_URL = 'https://image.tmdb.org/t/p/w500';
+const moviesContainer = document.getElementById('movies');
+const searchInput = document.getElementById('search');
+
+async function fetchMovies(query = 'popular') {
+  let url;
+  if (query === 'popular') {
+    url = `${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=1`;
+  } else {
+    url = `${BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`;
+  }
+  const res = await fetch(url);
+  const data = await res.json();
+  displayMovies(data.results);
+}
+
+function displayMovies(movies) {
+  moviesContainer.innerHTML = '';
+  if (!movies || movies.length === 0) {
+    moviesContainer.innerHTML = '<p style="grid-column:1/-1;text-align:center;">No movies found</p>';
+    return;
+  }
+  movies.forEach(movie => {
+    const movieEl = document.createElement('div');
+    movieEl.classList.add('movie');
+    movieEl.innerHTML = `
+      <img src="${movie.poster_path ? IMG_URL + movie.poster_path : 'https://via.placeholder.com/500x750'}" alt="${movie.title}" />
+      <div class="movie-info">
+        <h3>${movie.title}</h3>
+        <p>⭐ ${movie.vote_average} | ${movie.release_date ? movie.release_date.slice(0,4) : 'N/A'}</p>
+      </div>
+    `;
+    moviesContainer.appendChild(movieEl);
+  });
+}
+
+// Initial fetch
+fetchMovies();
+
+// Search functionality
+searchInput.addEventListener('keyup', (e) => {
+  const query = e.target.value.trim();
+  if (query.length > 0) {
+    fetchMovies(query);
+  } else {
+    fetchMovies('popular');
+  }
+});
+</script>
+
 </body>
 </html>
