@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 
 // Replace with your TMDb API key
-const API_KEY = "YOUR_TMDB_API_KEY";
+const API_KEY = "7cc9abef50e4c94689f48516718607be";
 
 const App = () => {
   const [movies, setMovies] = useState([]);
