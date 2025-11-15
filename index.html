@@ -3,47 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MovieHub – Trailers & Full Movies</title>
+<title>MovieHub – Netflix Style</title>
 <style>
 body { margin:0; font-family:Arial,sans-serif; background:#0a0a0a; color:#fff; }
 header { padding:20px; text-align:center; background:#141414; }
 header h1 { margin:0; font-size:2em; color:#ff3b3b; }
 .search-bar { text-align:center; margin:20px 0; }
 .search-bar input { padding:10px; width:300px; border-radius:5px; border:none; }
-.movies { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:20px; padding:20px; }
-.movie { background:#141414; border-radius:10px; overflow:hidden; transition:transform 0.3s; cursor:pointer; position:relative; }
-.movie:hover { transform:scale(1.05); }
-.movie img { width:100%; display:block; }
-.movie-info { padding:10px; }
-.movie-info h3 { margin:0 0 5px; font-size:1em; }
-.movie-info p { margin:0; font-size:0.9em; color:#9aa0a6; }
-.modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:flex; align-items:center; justify-content:center; display:none; z-index:1000; padding:20px; animation:fadeIn 0.3s; }
-.modal-content { background:#141414; border-radius:10px; padding:20px; max-width:900px; width:100%; max-height:90%; overflow-y:auto; position:relative; transform:scale(0.8); animation:zoomIn 0.3s forwards; }
+.movies { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:15px; padding:20px; }
+.movie { position:relative; cursor:pointer; overflow:hidden; border-radius:10px; }
+.movie img { width:100%; display:block; border-radius:10px; transition: transform 0.3s; }
+.movie:hover img { transform:scale(1.1); }
+.movie-info { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.8); padding:10px; opacity:0; transition: opacity 0.3s; font-size:0.9em; }
+.movie:hover .movie-info { opacity:1; }
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); align-items:center; justify-content:center; z-index:1000; padding:20px; }
+.modal-content { background:#141414; border-radius:10px; padding:20px; max-width:800px; width:100%; max-height:90%; overflow-y:auto; position:relative; }
 .close { position:absolute; top:10px; right:20px; font-size:1.5em; cursor:pointer; color:#ff3b3b; }
-.favorite-btn, .watch-btn { margin-top:10px; padding:5px 10px; background:#ff3b3b; border:none; border-radius:5px; cursor:pointer; color:#fff; display:inline-block; margin-right:5px; }
-.favorites-list { padding:20px; }
-.favorites-list h2 { margin-bottom:10px; color:#ff3b3b; }
-video { width:100%; max-height:450px; margin-top:10px; border-radius:10px; background:#000; }
-@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
-@keyframes zoomIn { from {transform:scale(0.8);} to {transform:scale(1);} }
+video, iframe { width:100%; margin-top:10px; border-radius:10px; }
+.favorite-btn { margin-top:10px; padding:5px 10px; background:#ff3b3b; border:none; border-radius:5px; cursor:pointer; color:#fff; }
 </style>
 </head>
 <body>
 
 <header>
-<h1>🎬 MovieHub – Trailers & Full Movies</h1>
+<h1>🎬 MovieHub</h1>
 </header>
 
 <div class="search-bar">
-<input type="text" id="search" placeholder="Search for a movie..." />
+<input type="text" id="search" placeholder="Search movies..." />
 </div>
 
 <div class="movies" id="movies"></div>
-
-<div class="favorites-list" id="favorites-list">
-<h2>Favorites</h2>
-<div id="favorites"></div>
-</div>
 
 <div class="modal" id="modal">
 <div class="modal-content" id="modal-content">
@@ -53,114 +43,70 @@ video { width:100%; max-height:450px; margin-top:10px; border-radius:10px; backg
 </div>
 
 <script>
-// DOM elements
+const API_KEY = '7cc9abef50e4c94689f48516718607be'; // 🔑 Replace with your TMDb API key
+const IMG_URL = 'https://image.tmdb.org/t/p/w500';
 const moviesContainer = document.getElementById('movies');
 const searchInput = document.getElementById('search');
 const modal = document.getElementById('modal');
 const modalBody = document.getElementById('modal-body');
 const closeModal = document.getElementById('close');
-const favoritesContainer = document.getElementById('favorites');
-
-// Favorites from localStorage
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-// Predefined free movies with trailers (short previews) & full movies
-let movieDB = [
-  {
-    id:1,
-    title:"Night of the Living Dead",
-    year:1968,
-    poster:"https://archive.org/download/nightofthelivingdead/night_poster.jpg",
-    overview:"Classic zombie horror.",
-    trailer:"https://archive.org/download/nightofthelivingdead/Night_of_the_Living_Dead_1968_512kb.mp4",
-    full:"https://archive.org/download/nightofthelivingdead/Night_of_the_Living_Dead_1968_512kb.mp4"
-  },
-  {
-    id:2,
-    title:"His Girl Friday",
-    year:1940,
-    poster:"https://archive.org/download/hisgirlfridayposter/hisgirlfridayposter.jpg",
-    overview:"Fast-paced screwball comedy.",
-    trailer:"https://archive.org/download/HisGirlFriday/HisGirlFriday_512kb.mp4",
-    full:"https://archive.org/download/HisGirlFriday/HisGirlFriday_512kb.mp4"
-  },
-  {
-    id:3,
-    title:"Metropolis",
-    year:1927,
-    poster:"https://archive.org/download/metropolis_1927_poster/metropolis_poster.jpg",
-    overview:"Silent sci-fi classic.",
-    trailer:"https://archive.org/download/metropolis_1927_512kb/Metropolis_512kb.mp4",
-    full:"https://archive.org/download/metropolis_1927_512kb/Metropolis_512kb.mp4"
-  }
-];
+// Fetch trending movies from TMDb
+async function fetchMovies(query=''){
+    let url = query 
+        ? `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`
+        : `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    displayMovies(data.results);
+}
 
-// Display movies
+// Display movies grid
 function displayMovies(movies){
-  moviesContainer.innerHTML='';
-  if(!movies || movies.length===0){
-    moviesContainer.innerHTML='<p style="grid-column:1/-1;text-align:center;">No movies found</p>';
-    return;
-  }
-  movies.forEach(movie=>{
-    const movieEl=document.createElement('div');
-    movieEl.classList.add('movie');
-    movieEl.innerHTML=`
-      <img src="${movie.poster}" alt="${movie.title}" />
-      <div class="movie-info">
-        <h3>${movie.title}</h3>
-        <p>⭐ – | ${movie.year}</p>
-        <button class="watch-btn" onclick="openModal(${movie.id}, 'trailer')">Trailer</button>
-        <button class="watch-btn" onclick="openModal(${movie.id}, 'full')">Full Movie</button>
-        <button class="favorite-btn" onclick="addFavorite(${movie.id})">Add to Favorites</button>
-      </div>
+    moviesContainer.innerHTML = '';
+    if(!movies || movies.length===0){
+        moviesContainer.innerHTML='<p style="grid-column:1/-1;text-align:center;">No movies found</p>';
+        return;
+    }
+    movies.forEach(movie => {
+        const movieEl = document.createElement('div');
+        movieEl.classList.add('movie');
+        movieEl.innerHTML = `
+            <img src="${IMG_URL + movie.poster_path}" alt="${movie.title}" />
+            <div class="movie-info">
+                <h3>${movie.title}</h3>
+                <p>${movie.release_date ? movie.release_date.split('-')[0] : ''}</p>
+            </div>
+        `;
+        movieEl.addEventListener('click',()=>openModal(movie.id));
+        moviesContainer.appendChild(movieEl);
+    });
+}
+
+// Open modal with trailer
+async function openModal(movieId){
+    const res = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${API_KEY}`);
+    const data = await res.json();
+    const trailer = data.results.find(v=>v.type==='Trailer' && v.site==='YouTube');
+    const movieRes = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`);
+    const movieData = await movieRes.json();
+    modalBody.innerHTML = `
+        <h2>${movieData.title} (${movieData.release_date ? movieData.release_date.split('-')[0] : ''})</h2>
+        <p>${movieData.overview}</p>
+        ${trailer ? `<iframe src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>` : '<p>No trailer available</p>'}
+        <button class="favorite-btn" onclick="addFavorite(${movieId})">Add to Favorites</button>
     `;
-    moviesContainer.appendChild(movieEl);
-  });
+    modal.style.display='flex';
 }
 
-// Open modal
-function openModal(id,type){
-  const movie = movieDB.find(m=>m.id===id);
-  if(!movie) return;
-  let videoSrc = (type==='trailer') ? movie.trailer : movie.full;
-  modalBody.innerHTML = `
-    <h2>${movie.title} (${movie.year})</h2>
-    <p>${movie.overview}</p>
-    <video controls autoplay>
-      <source src="${videoSrc}" type="video/mp4">
-      Your browser does not support the video tag.
-    </video>
-  `;
-  modal.style.display='flex';
-}
-
-// Add favorite
+// Favorites
 function addFavorite(id){
-  const movie = movieDB.find(m=>m.id===id);
-  if(!movie) return;
-  if(!favorites.some(f=>f.id===id)){
-    favorites.push(movie);
-    localStorage.setItem('favorites',JSON.stringify(favorites));
-    displayFavorites();
-    alert(`${movie.title} added to favorites!`);
-  } else alert(`${movie.title} is already in favorites.`);
-}
-
-// Display favorites
-function displayFavorites(){
-  favoritesContainer.innerHTML='';
-  favorites.forEach(f=>{
-    const favEl=document.createElement('div');
-    favEl.style.display='inline-block';
-    favEl.style.marginRight='10px';
-    favEl.style.textAlign='center';
-    favEl.innerHTML=`
-      <img src="${f.poster}" width="100" />
-      <p style="font-size:0.8em;">${f.title}</p>
-    `;
-    favoritesContainer.appendChild(favEl);
-  });
+    if(!favorites.includes(id)){
+        favorites.push(id);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+        alert('Added to favorites!');
+    } else alert('Already in favorites!');
 }
 
 // Close modal
@@ -168,17 +114,12 @@ closeModal.addEventListener('click',()=>modal.style.display='none');
 window.addEventListener('click',e=>{if(e.target==modal) modal.style.display='none';});
 
 // Search
-searchInput.addEventListener('keyup',(e)=>{
-  const query = e.target.value.toLowerCase().trim();
-  if(query.length>0){
-    const filtered = movieDB.filter(m=>m.title.toLowerCase().includes(query));
-    displayMovies(filtered);
-  } else displayMovies(movieDB);
+searchInput.addEventListener('keyup', e=>{
+    fetchMovies(e.target.value.trim());
 });
 
 // Initial load
-displayMovies(movieDB);
-displayFavorites();
+fetchMovies();
 </script>
 
 </body>
