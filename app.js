@@ -1,85 +1,114 @@
-const apiKey = "22d70df8d4ebcfb18d99d87ea3346b029a31ab9515e49bf28be29a1dc5225d55";
+const API_KEY = '7cc9abef50e4c94689f48516718607be';
+const IMG_URL = 'https://image.tmdb.org/t/p/w500';
 
-async function searchMovies(query) {
-  const url = `https://api.simkl.com/search/?q=${query}&type=movie&client_id=${apiKey}`;
-  const res = await fetch(url);
+const movieList = document.getElementById('movieList');
+const searchInput = document.getElementById('searchInput');
+const movieModal = document.getElementById('movieModal');
+const modalTitle = document.getElementById('modalTitle');
+const moviePlayer = document.getElementById('moviePlayer');
+const closeModal = document.querySelector('.close');
 
-  if (!res.ok) {
-    console.log("API ERROR:", await res.text());
-    return [];
-  }
-
-  const data = await res.json();
-  return data;
+// Fetch trending movies initially
+async function fetchTrending() {
+    const res = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+    const data = await res.json();
+    displayMovies(data.results);
 }
 
-document.getElementById("searchInput").addEventListener("input", async (e) => {
-  const query = e.target.value.trim();
-  if (query.length < 2) return;
+// Search movies
+async function searchMovies(query) {
+    const res = await fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+    const data = await res.json();
+    displayMovies(data.results);
+}
 
-  const movies = await searchMovies(query);
-  displayMovies(movies);
-});
-
+// Display movies in grid
 function displayMovies(movies) {
-  const movieList = document.getElementById("movieList");
-  movieList.innerHTML = "";
+    movieList.innerHTML = '';
+    if (!movies || movies.length === 0) {
+        movieList.innerHTML = '<p style="grid-column:1/-1;text-align:center;">No movies found</p>';
+        return;
+    }
+    movies.forEach(movie => {
+        const div = document.createElement('div');
+        div.classList.add('movie');
+        div.innerHTML = `
+            <img src="${IMG_URL + movie.poster_path}" alt="${movie.title}">
+            <div class="movie-info">
+                <h3>${movie.title}</h3>
+                <p>${movie.release_date ? movie.release_date.split('-')[0] : ''}</p>
+            </div>
+        `;
+        div.onclick = () => openModal(movie);
+        movieList.appendChild(div);
+    });
+}
 
-  if (!movies.length) {
-    movieList.innerHTML = "<p>No movies found.</p>";
-    return;
-  }
+// Open modal with trailer + player
+async function openModal(movie) {
+    modalTitle.textContent = movie.title;
+    moviePlayer.src = ''; // Reset player
 
-  movies.forEach(movie => {
-    const div = document.createElement("div");
-    div.classList.add("movie");
+    // Fetch trailers
+    const res = await fetch(`https://api.themoviedb.org/3/movie/${movie.id}/videos?api_key=${API_KEY}`);
+    const data = await res.json();
+    const trailer = data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
 
-    const poster = movie.poster ? movie.poster : "https://via.placeholder.com/300x450?text=No+Image";
+    let modalContent = '';
+    if (trailer) {
+        modalContent += `<iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen style="margin-top:10px; height:250px;"></iframe>`;
+    } else {
+        modalContent += '<p>No trailer available</p>';
+    }
 
-    div.innerHTML = `
-      <img src="${poster}" alt="${movie.title}">
-      <p>${movie.title}</p>
+    // Add full movie player buttons
+    modalContent += `
+        <h3>Play Movie:</h3>
+        <button onclick="playMovie('vidsrc', ${movie.id})">VidSrc</button>
+        <button onclick="playMovie('videoverse', ${movie.id})">VideoVerse</button>
+        <button onclick="playMovie('hdmovie', ${movie.id})">HDMovies</button>
     `;
 
-    div.onclick = () => openPlayer(movie);
-    movieList.appendChild(div);
-  });
-}
+    // Inject modal content
+    movieModal.querySelector('.modal-content').innerHTML = `
+        <span class="close">&times;</span>
+        <h2 id="modalTitle">${movie.title}</h2>
+        <iframe id="moviePlayer" allowfullscreen style="margin-top:10px; height:300px;"></iframe>
+        ${modalContent}
+    `;
 
-function openPlayer(movie) {
-  document.getElementById("modalTitle").textContent = movie.title;
-
-  const tmdb = movie.ids?.tmdb;
-  if (!tmdb) {
-    alert("This movie has no TMDB ID. Cannot play.");
-    return;
-  }
-
-  const players = [
-    `https://vidsrc.to/embed/movie/${tmdb}`,
-    `https://videoverse.cloud/embed/movie/${tmdb}`,
-    `https://hidemovies.xyz/embed/${tmdb}`
-  ];
-
-  let index = 0;
-  const iframe = document.getElementById("moviePlayer");
-
-  const tryNext = () => {
-    iframe.src = players[index];
-
-    iframe.onerror = () => {
-      index++;
-      if (index < players.length) tryNext();
-      else alert("No working video source.");
+    // Re-assign close event
+    movieModal.querySelector('.close').onclick = () => {
+        movieModal.style.display = 'none';
+        document.getElementById('moviePlayer').src = '';
     };
-  };
 
-  tryNext();
-
-  document.getElementById("movieModal").style.display = "block";
+    movieModal.style.display = 'flex';
 }
 
-document.querySelector(".close").onclick = () => {
-  document.getElementById("movieModal").style.display = "none";
-  document.getElementById("moviePlayer").src = "";
-};
+// Play movie using selected provider
+function playMovie(provider, tmdbId) {
+    const iframe = document.getElementById('moviePlayer');
+    let urls = {
+        vidsrc: `https://vidsrc.to/embed/movie/${tmdbId}`,
+        videoverse: `https://videoverse.cloud/embed/movie/${tmdbId}`,
+        hdmovie: `https://hidemovies.xyz/embed/${tmdbId}`
+    };
+    iframe.src = urls[provider];
+}
+
+// Search on Enter
+searchInput.addEventListener('keyup', e => {
+    if (e.key === 'Enter') searchMovies(e.target.value.trim());
+});
+
+// Close modal on outside click
+window.addEventListener('click', e => {
+    if (e.target === movieModal) {
+        movieModal.style.display = 'none';
+        moviePlayer.src = '';
+    }
+});
+
+// Initial load
+fetchTrending();
