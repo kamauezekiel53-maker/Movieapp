@@ -3,43 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MovieHub – Netflix Style</title>
+<title>MovieHub 2.0 — Movies, Series & Anime</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <header>
-  <h1>🎬 MovieHub</h1>
+  <h1>🎬 MovieHub 2.0</h1>
   <input type="text" id="searchInput" placeholder="Search movies, series, anime...">
-  <button id="viewFavorites">Favorites ⭐</button>
+  <button id="viewFavorites">Favorites ❤️</button>
+  <button id="toggleTheme">🌓</button>
 </header>
 
 <main>
   <section>
     <h2>Trending Movies</h2>
-    <div id="moviesRow" class="row"></div>
+    <div class="row" id="moviesRow"></div>
   </section>
-
   <section>
-    <h2>Trending Series</h2>
-    <div id="seriesRow" class="row"></div>
+    <h2>Trending TV Series</h2>
+    <div class="row" id="seriesRow"></div>
   </section>
-
   <section>
     <h2>Trending Anime</h2>
-    <div id="animeRow" class="row"></div>
+    <div class="row" id="animeRow"></div>
   </section>
 </main>
 
-<!-- Movie/Series Modal -->
-<div id="modal" class="modal">
+<div class="modal" id="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
     <h2 id="modalTitle"></h2>
-    <iframe id="player" allowfullscreen></iframe>
     <div id="trailerContainer"></div>
+    <iframe id="player" src="" allowfullscreen></iframe>
     <div id="playerButtons"></div>
-    <button id="addFavorite" class="favorite-btn">Add to Favorites ⭐</button>
+    <button id="addFavorite">Add to Favorites</button>
   </div>
 </div>
 
