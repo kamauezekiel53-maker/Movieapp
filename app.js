@@ -1,4 +1,4 @@
-const apiKey = "30de4b3340b4d7538b2749a60af12d71793126e39de3a8c69f88333271e5b5bb";
+const apiKey = "22d70df8d4ebcfb18d99d87ea3346b029a31ab9515e49bf28be29a1dc5225d55";
 
 async function searchMovies(query) {
   const url = `https://api.simkl.com/search/?q=${query}&type=movie&client_id=${apiKey}`;
