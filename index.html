@@ -1,46 +1,65 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MovieHub 2.0 — Movies, Series & Anime</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MovieHub — Demo</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <header class="navbar">
+    <div class="left">
+      <h1 class="logo">🎬 MovieHub</h1>
+      <nav>
+        <ul class="menu">
+          <li class="menu-item active">Home</li>
+          <li class="menu-item">TV Shows</li>
+          <li class="menu-item">Movies</li>
+        </ul>
+      </nav>
+    </div>
+    <div class="right">
+      <input id="searchInput" class="search" placeholder="Search movies..." />
+      <button id="searchBtn" class="icon-btn" aria-label="Search">🔍</button>
+    </div>
+  </header>
 
-<header>
-  <h1>🎬 MovieHub 2.0</h1>
-  <input type="text" id="searchInput" placeholder="Search movies, series, anime...">
-  <button id="viewFavorites">Favorites ❤️</button>
-  <button id="toggleTheme">🌓</button>
-</header>
-
-<main>
-  <section>
-    <h2>Trending Movies</h2>
-    <div class="row" id="moviesRow"></div>
+  <!-- HERO -->
+  <section id="hero" class="hero">
+    <img id="hero-img" class="hero-bg" src="" alt="Hero backdrop" />
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h2 id="hero-title">Loading...</h2>
+      <p id="hero-desc"></p>
+      <div class="hero-actions">
+        <button id="play-btn" class="play-btn">▶ Play</button>
+        <button id="more-btn" class="muted-btn">More Info</button>
+      </div>
+    </div>
   </section>
-  <section>
-    <h2>Trending TV Series</h2>
-    <div class="row" id="seriesRow"></div>
-  </section>
-  <section>
-    <h2>Trending Anime</h2>
-    <div class="row" id="animeRow"></div>
-  </section>
-</main>
 
-<div class="modal" id="modal">
-  <div class="modal-content">
-    <span class="close">&times;</span>
-    <h2 id="modalTitle"></h2>
-    <div id="trailerContainer"></div>
-    <iframe id="player" src="" allowfullscreen></iframe>
-    <div id="playerButtons"></div>
-    <button id="addFavorite">Add to Favorites</button>
-  </div>
-</div>
+  <!-- Rows -->
+  <main>
+    <section class="row">
+      <h3>Trending Now</h3>
+      <div class="row-container" id="trending"></div>
+    </section>
 
-<script src="app.js"></script>
+    <section class="row">
+      <h3>Top Rated</h3>
+      <div class="row-container" id="toprated"></div>
+    </section>
+
+    <section class="row">
+      <h3>Action Movies</h3>
+      <div class="row-container" id="action"></div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <small>Data provided by TMDB</small>
+  </footer>
+
+  <script src="app.js" defer></script>
 </body>
 </html>
