@@ -1,4 +1,4 @@
-const apiKey = 'YOUR_API_KEY'; // Replace with your TMDB API key
+const apiKey = '7cc9abef50e4c94689f48516718607be'; // Replace with your TMDB API key
 const searchInput = document.getElementById('search');
 const searchBtn = document.getElementById('searchBtn');
 const moviesContainer = document.getElementById('movies');
