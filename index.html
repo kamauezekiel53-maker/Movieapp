@@ -1,119 +1,18 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reel — Movies & Trailers</title>
-  <meta name="theme-color" content="#141414" />
-  <link rel="preconnect" href="https://image.tmdb.org">
-  <link rel="stylesheet" href="styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Discovery</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="theme-dark">
-  <header class="header">
-    <div class="brand">
-      <span class="mark">▮▮</span>
-      <div class="titles">
-        <h1 class="app-name">Reel</h1>
-        <p class="tagline">Movies, trailers, and favorites — all in one place.</p>
-      </div>
-    </div>
-    <nav class="nav">
-      <button class="tab-btn" data-mode="popular" aria-pressed="true">Popular</button>
-      <button class="tab-btn" data-mode="top_rated">Top Rated</button>
-      <button class="tab-btn" data-mode="now_playing">Now Playing</button>
-      <button class="tab-btn" data-mode="upcoming">Upcoming</button>
-      <button id="favoritesBtn" class="icon-btn" title="Favorites">❤️</button>
-      <button id="themeToggle" class="icon-btn" title="Toggle theme">🌓</button>
-    </nav>
-  </header>
-
-  <section class="controls">
-    <div class="search-row">
-      <input id="searchInput" class="search-input" type="search" placeholder="Search movies or keywords" aria-label="Search movies">
-      <button id="searchBtn" class="btn">Search</button>
-      <button id="clearSearchBtn" class="ghost-btn" title="Clear">Clear</button>
-    </div>
-
-    <div class="filter-row">
-      <label class="filter">
-        <span class="label">Genre</span>
-        <select id="genreFilter" class="select">
-          <option value="">All</option>
-        </select>
-      </label>
-
-      <label class="filter">
-        <span class="label">Year</span>
-        <select id="yearFilter" class="select">
-          <option value="">Any</option>
-        </select>
-      </label>
-
-      <label class="filter">
-        <span class="label">Sort</span>
-        <select id="sortFilter" class="select">
-          <option value="popularity.desc">Popularity ↓</option>
-          <option value="popularity.asc">Popularity ↑</option>
-          <option value="release_date.desc">Release date ↓</option>
-          <option value="release_date.asc">Release date ↑</option>
-          <option value="vote_average.desc">Rating ↓</option>
-          <option value="vote_average.asc">Rating ↑</option>
-        </select>
-      </label>
-
-      <div class="filter-actions">
-        <button id="applyFilters" class="btn">Apply</button>
-        <button id="clearFilters" class="ghost-btn">Reset</button>
-      </div>
-    </div>
-  </section>
-
-  <main class="main">
-    <section class="statusbar">
-      <div id="status" class="status">Ready.</div>
-      <div class="actions">
-        <label class="inline"><input id="infiniteToggle" type="checkbox"> Infinite scroll</label>
-        <button id="loadMore" class="ghost-btn">Load more</button>
-        <span id="pageInfo" class="page-info">Page 1</span>
-      </div>
-    </section>
-
-    <section id="grid" class="grid" aria-live="polite" aria-busy="false">
-      <!-- Cards injected here -->
-    </section>
-  </main>
-
-  <footer class="footer">
-    <small>Data by TMDB. This product uses the TMDB API but is not endorsed by TMDB.</small>
-  </footer>
-
-  <aside id="favoritesPanel" class="drawer" aria-hidden="true">
-    <div class="drawer-head">
-      <h2>Favorites</h2>
-      <div class="drawer-actions">
-        <button id="closeFav" class="ghost-btn">Close</button>
-        <button id="clearFav" class="ghost-btn">Clear all</button>
-      </div>
-    </div>
-    <div id="favList" class="fav-list"></div>
-  </aside>
-
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="modal-inner" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <button id="closeModal" class="modal-close" aria-label="Close">✕</button>
-      <div id="modalBody" class="modal-body">
-        <!-- Filled dynamically -->
-      </div>
-    </div>
-  </div>
-
-  <div id="overlay" class="overlay hidden" aria-hidden="true">
-    <div class="spinner" role="status" aria-label="Loading"></div>
-  </div>
-
-  <div id="offline" class="offline hidden">Offline — showing cached results if available.</div>
-  <div id="toasts" class="toasts" aria-live="assertive"></div>
-
-  <script src="app.js" defer></script>
+<body>
+    <header>
+        <h1>🎥 Movie Discovery</h1>
+        <input type="text" id="search" placeholder="Search for movies...">
+        <button id="searchBtn">Search</button>
+    </header>
+    <main id="movies"></main>
+    <script src="script.js"></script>
 </body>
 </html>
