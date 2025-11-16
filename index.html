@@ -3,158 +3,127 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MovieExplorer — Feature Packed Movie App</title>
-
-  <!-- Styles -->
+  <title>MovieExplorer — Neon Cyberpunk</title>
   <link rel="stylesheet" href="styles.css" />
-
-  <!-- Meta / PWA-ish hints (no service worker file provided) -->
-  <meta name="theme-color" content="#0f172a" />
-  <meta name="description" content="MovieExplorer — Search, browse, filter, favorite and watch movie info using TMDB. Full-featured single-page app using plain HTML/CSS/JS." />
 </head>
-<body class="theme-dark">
-  <div id="app" class="app-root">
+<body class="theme-neon">
 
-    <!-- Header -->
-    <header class="header" role="banner">
-      <div class="header-inner">
-        <h1 class="brand" id="brand">🎬 MovieExplorer</h1>
-        <div class="controls">
-          <label class="visually-hidden" for="search">Search movies</label>
-          <input id="search" class="search-input" type="search" placeholder="Search movies, actors, keywords..." aria-label="Search movies" />
-          
-          <select id="mode" class="select" title="Choose mode" aria-label="Mode">
-            <option value="popular">Popular</option>
-            <option value="top_rated">Top Rated</option>
-            <option value="now_playing">Now Playing</option>
-            <option value="upcoming">Upcoming</option>
-            <option value="trending">Trending (Week)</option>
-          </select>
-
-          <button id="themeToggle" class="btn small" title="Toggle theme" aria-pressed="false">Toggle Theme</button>
-          <button id="favoritesToggle" class="btn small" title="Open favorites (f)">Favorites ❤️</button>
-        </div>
-      </div>
-
-      <div class="subheader">
-        <div class="filters">
-          <div class="filter-group">
-            <label for="genre">Genre</label>
-            <select id="genre" class="select">
-              <option value="">All genres</option>
-            </select>
-          </div>
-
-          <div class="filter-group">
-            <label for="year">Year</label>
-            <input id="year" type="range" min="1900" max="2026" value="2026" />
-            <output id="yearOut">2026</output>
-          </div>
-
-          <div class="filter-group">
-            <label for="sort">Sort</label>
-            <select id="sort" class="select">
-              <option value="popularity.desc">Popularity ↓</option>
-              <option value="popularity.asc">Popularity ↑</option>
-              <option value="release_date.desc">Release Date ↓</option>
-              <option value="release_date.asc">Release Date ↑</option>
-              <option value="vote_average.desc">Rating ↓</option>
-              <option value="vote_average.asc">Rating ↑</option>
-            </select>
-          </div>
-
-          <div class="filter-actions">
-            <button id="applyFilters" class="btn">Apply</button>
-            <button id="clearFilters" class="btn muted">Clear</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <!-- Main content -->
-    <main id="main" class="main" role="main">
-      <section class="hero">
-        <div class="hero-inner">
-          <h2 id="heroTitle">Browse popular movies or search for anything.</h2>
-          <p id="heroSubtitle">Use filters, keyboard shortcuts, and favorites. Click a card for details and trailer.</p>
-        </div>
-      </section>
-
-      <section class="toolbar" aria-hidden="false">
-        <div class="toolbar-inner">
-          <div id="status" class="status">Ready.</div>
-
-          <div class="toolbar-actions">
-            <label><input id="infiniteToggle" type="checkbox" /> Infinite scroll</label>
-            <button id="loadMore" class="btn" aria-label="Load more results">Load more</button>
-            <button id="clearCache" class="btn muted">Clear cache</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="grid" class="grid" aria-live="polite" aria-busy="false">
-        <!-- movie cards injected here -->
-      </section>
-
-      <nav id="pagination" class="pagination" aria-label="Pagination">
-        <button id="firstPage" class="btn small">« First</button>
-        <button id="prevPage" class="btn small">‹ Prev</button>
-        <span id="pageInfo" class="page-info">Page 1 of 1</span>
-        <button id="nextPage" class="btn small">Next ›</button>
-        <button id="lastPage" class="btn small">Last »</button>
-      </nav>
-    </main>
-
-    <!-- Favorites drawer -->
-    <aside id="favorites" class="drawer" aria-hidden="true" aria-label="Favorites">
-      <div class="drawer-header">
-        <h3>Favorites ❤️</h3>
-        <button id="closeFav" class="btn small">Close</button>
-      </div>
-      <div id="favList" class="fav-list">
-        <!-- favorite items -->
-      </div>
-      <div class="drawer-footer">
-        <button id="clearFav" class="btn muted">Clear favorites</button>
-      </div>
-    </aside>
-
-    <!-- Details modal -->
-    <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
-      <div class="modal-content" role="document">
-        <button id="closeModal" class="modal-close" aria-label="Close details">✕</button>
-        <div id="modalBody" class="modal-body" tabindex="0">
-          <!-- details injected here -->
-        </div>
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo">🎞️</div>
+      <div>
+        <h1>MovieExplorer</h1>
+        <p class="tag">Neon Cyberpunk — explore movies in style</p>
       </div>
     </div>
 
-    <!-- Toasts / notifications -->
-    <div id="toasts" class="toasts" aria-live="assertive" aria-atomic="true"></div>
-
-    <!-- Offline banner -->
-    <div id="offline" class="offline hidden" role="status">You appear offline — showing cached results if available.</div>
-
-    <!-- Loading skeleton / overlay -->
-    <div id="overlay" class="overlay hidden" aria-hidden="true">
-      <div class="spinner" role="status" aria-label="Loading"></div>
-    </div>
-
-    <!-- No-JS fallback -->
-    <noscript>
-      <div class="no-js">This app requires JavaScript. Please enable JavaScript in your browser to use MovieExplorer.</div>
-    </noscript>
-
-    <!-- Footer / small help -->
-    <footer class="footer" role="contentinfo">
-      <div class="footer-inner">
-        <small>Keyboard shortcuts: <strong>/</strong> focus search, <strong>f</strong> open favorites, <strong>t</strong> toggle theme, <strong>?</strong> show help.</small>
-        <a href="https://www.themoviedb.org/" target="_blank" rel="noopener noreferrer">Powered by TMDB</a>
+    <div class="header-actions">
+      <div class="search-wrap">
+        <input id="searchInput" type="search" placeholder="Search movies, actors, keywords..." aria-label="Search movies" />
+        <button id="clearSearch" class="icon-btn" title="Clear search">✕</button>
       </div>
-    </footer>
+
+      <div class="mode-wrap">
+        <select id="modeSelect" aria-label="Mode">
+          <option value="popular">Popular</option>
+          <option value="top_rated">Top Rated</option>
+          <option value="now_playing">Now Playing</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="trending">Trending (Week)</option>
+        </select>
+        <button id="themeToggle" class="neon-btn">Toggle Theme</button>
+        <button id="favToggle" class="neon-btn">Favorites ❤️</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="controls">
+    <div class="filter-row">
+      <label class="small">Genre
+        <select id="genreSelect">
+          <option value="">All genres</option>
+        </select>
+      </label>
+
+      <label class="small">Year
+        <input id="yearRange" type="range" min="1900" max="2026" value="2026" />
+        <output id="yearOutput">2026</output>
+      </label>
+
+      <label class="small">Sort
+        <select id="sortSelect">
+          <option value="popularity.desc">Popularity ↓</option>
+          <option value="popularity.asc">Popularity ↑</option>
+          <option value="release_date.desc">Release date ↓</option>
+          <option value="release_date.asc">Release date ↑</option>
+          <option value="vote_average.desc">Rating ↓</option>
+          <option value="vote_average.asc">Rating ↑</option>
+        </select>
+      </label>
+
+      <div class="filter-actions">
+        <button id="applyFilters" class="glass-btn">Apply</button>
+        <button id="clearFilters" class="glass-btn">Clear</button>
+      </div>
+    </div>
+  </section>
+
+  <main class="main">
+    <section class="hero">
+      <h2>Browse popular movies or search for anything.</h2>
+      <p class="subtitle">Use filters, keyboard shortcuts, favorites, and neon vibes. Click a card for details & trailer.</p>
+    </section>
+
+    <section class="toolbar">
+      <div id="status" class="status">Ready.</div>
+      <div class="toolbar-actions">
+        <label class="inline"><input id="infiniteToggle" type="checkbox"> Infinite scroll</label>
+        <button id="loadMore" class="glass-btn">Load more</button>
+        <button id="clearCache" class="glass-btn">Clear cache</button>
+      </div>
+    </section>
+
+    <section id="grid" class="grid" aria-live="polite" aria-busy="false">
+      <!-- Movie cards inserted here -->
+    </section>
+
+    <nav id="pagination" class="pagination" aria-label="Pagination">
+      <button id="firstBtn" class="page-btn">« First</button>
+      <button id="prevBtn" class="page-btn">‹ Prev</button>
+      <span id="pageInfo" class="page-info">Page 1 of 1</span>
+      <button id="nextBtn" class="page-btn">Next ›</button>
+      <button id="lastBtn" class="page-btn">Last »</button>
+    </nav>
+  </main>
+
+  <aside id="favoritesPanel" class="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <h3>Favorites ❤️</h3>
+      <div>
+        <button id="closeFav" class="glass-btn">Close</button>
+        <button id="clearFav" class="glass-btn">Clear favorites</button>
+      </div>
+    </div>
+    <div id="favList" class="fav-list"></div>
+  </aside>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-inner" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button id="closeModal" class="modal-close" aria-label="Close">✕</button>
+      <div id="modalBody" class="modal-body">
+        <!-- details injected here -->
+      </div>
+    </div>
   </div>
 
-  <!-- App script -->
+  <div id="offline" class="offline hidden">You appear offline — showing cached results if available.</div>
+
+  <div id="toasts" class="toasts" aria-live="assertive"></div>
+
+  <div id="overlay" class="overlay hidden" aria-hidden="true">
+    <div class="spinner" role="status" aria-label="Loading"></div>
+  </div>
+
   <script src="app.js" defer></script>
 </body>
 </html>
