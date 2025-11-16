@@ -1,87 +1,93 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Arial', sans-serif;
-    background: #000;  /* Dark background for a movie theater feel */
-    color: white;
-    min-height: 100vh;
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #4f46e5, #ec4899);
+  min-height: 100vh;
+  color: white;
 }
 
 header {
-    text-align: center;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.8);
-    border-bottom: 2px solid #ff6b6b;  /* Subtle red accent */
+  text-align: center;
+  padding: 30px 20px;
 }
 
-h1 {
-    margin: 0;
-    font-size: 2.5em;
-    color: #ff6b6b;  /* Red for movie vibe */
+header h1 {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #fff;
+  text-shadow: 0 4px 14px rgba(0,0,0,0.3);
 }
 
-#search {
-    padding: 10px;
-    width: 300px;
-    border: 1px solid #333;
-    border-radius: 5px;
-    margin: 10px;
-    font-size: 1em;
-    background: #222;
-    color: white;
+form {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
-#searchBtn {
-    padding: 10px 20px;
-    background: #ff6b6b;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
+form input {
+  width: 260px;
+  padding: 10px 15px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 16px;
 }
 
-#searchBtn:hover {
-    background: #ff5252;
+form button {
+  padding: 10px 20px;
+  background: #22c55e;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
 }
 
-#movies {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 20px;
+form button:hover {
+  background: #16a34a;
 }
 
-.movie {
-    background: rgba(255, 255, 255, 0.05);
-    margin: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    width: 200px;
-    text-align: center;
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-    border: 1px solid #333;
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+  padding: 20px;
 }
 
-.movie:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+.movie-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: 0.3s;
+  cursor: pointer;
 }
 
-.movie img {
-    width: 100%;
-    border-radius: 5px;
+.movie-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.25);
 }
 
-.movie h3 {
-    margin: 10px 0;
-    font-size: 1.2em;
-    color: #ff6b6b;
+.movie-card img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
 }
 
-.movie p {
-    margin: 5px 0;
-    font-size: 0.9em;
-    color: #ccc;
+.movie-info {
+  padding: 15px;
+}
+
+.movie-info h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.movie-info p {
+  font-size: 14px;
+  opacity: 0.9;
 }
