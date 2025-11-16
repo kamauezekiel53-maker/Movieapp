@@ -3,55 +3,96 @@ const IMG_URL = 'https://image.tmdb.org/t/p/w500';
 
 const trendingRow = document.getElementById('trendingRow');
 const topRatedRow = document.getElementById('topRatedRow');
-const actionRow = document.getElementById('actionRow');
-const comedyRow = document.getElementById('comedyRow');
-const searchRow = document.getElementById('searchRow');
+const upcomingRow = document.getElementById('upcomingRow');
+const animeRow = document.getElementById('animeRow');
 const searchInput = document.getElementById('searchInput');
-const genreSelect = document.getElementById('genreSelect');
 
-const modal = document.getElementById('trailerModal');
-const trailerIframe = document.getElementById('trailerIframe');
-const closeModal = document.querySelector('.close');
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalOverview = document.getElementById('modalOverview');
+const modalTrailer = document.getElementById('modalTrailer');
+const closeModal = document.getElementById('closeModal');
 
-const watchlistBtn = document.getElementById('watchlistBtn');
-const watchlistModal = document.getElementById('watchlistModal');
-const closeWatchlist = document.querySelector('.close-watchlist');
-const watchlistContainer = document.getElementById('watchlistContainer');
+let currentMovie = null;
 
-const themeToggle = document.getElementById('themeToggle');
+// Local Storage
+const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-
-// Close modals
-closeModal.onclick = () => { modal.style.display = 'none'; trailerIframe.src = ''; };
-closeWatchlist.onclick = () => { watchlistModal.style.display = 'none'; };
-
-// Show watchlist
-watchlistBtn.onclick = () => {
-  renderWatchlist();
-  watchlistModal.style.display = 'flex';
+// =================== Close Modal ===================
+closeModal.onclick = () => {
+  modal.style.display = 'none';
+  modalTrailer.src = '';
 };
 
-// Theme toggle
-themeToggle.onclick = () => {
-  document.body.classList.toggle('light');
-};
-
-// Fetch movies
-async function fetchMovies(url, container) {
-  container.innerHTML = '<div class="loader"></div>';
+// =================== Fetch Movies ===================
+async function fetchMovies(url, row) {
   const res = await fetch(url);
   const data = await res.json();
-  container.innerHTML = '';
+  row.innerHTML = '';
   data.results.forEach(movie => {
-    createMovieCard(movie, container);
+    const img = document.createElement('img');
+    img.src = IMG_URL + movie.poster_path;
+    img.alt = movie.title;
+    img.onclick = () => openModal(movie.id);
+    row.appendChild(img);
   });
 }
 
-// Create movie card
-function createMovieCard(movie, container, isWatchlist = false) {
-  const card = document.createElement('div');
-  card.className = 'movie-card';
-  const isFavorited = watchlist.some(item => item.id === movie.id && item.media_type === (movie.media_type || 'movie'));
-  card.innerHTML = `
-    <img src="${IMG_URL + movie.poster_path
+// =================== Open Modal ===================
+async function openModal(movieId) {
+  const res = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}&append_to_response=videos`);
+  const movie = await res.json();
+  currentMovie = movie;
+
+  modalTitle.innerText = movie.title;
+  modalOverview.innerText = movie.overview;
+
+  const trailer = movie.videos.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+  if(trailer) modalTrailer.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+
+  document.getElementById('futureFeatures').innerHTML = `
+    Feature placeholders: Rating ⭐ | Trivia 🎲 | AR Filters 📱 | Analytics 📊
+  `;
+
+  modal.style.display = 'flex';
+}
+
+// =================== Watchlist / Favorites ===================
+document.getElementById('addWatchlist').onclick = () => {
+  if(currentMovie && !watchlist.find(m => m.id === currentMovie.id)) {
+    watchlist.push({id: currentMovie.id, title: currentMovie.title});
+    localStorage.setItem('watchlist', JSON.stringify(watchlist));
+    alert('Added to Watchlist!');
+  }
+};
+
+document.getElementById('addFavorite').onclick = () => {
+  if(currentMovie && !favorites.find(m => m.id === currentMovie.id)) {
+    favorites.push({id: currentMovie.id, title: currentMovie.title});
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+    alert('Added to Favorites!');
+  }
+};
+
+document.getElementById('shareMovie').onclick = () => {
+  if(currentMovie) alert(`Share link (placeholder) for ${currentMovie.title}`);
+};
+
+// =================== Initial Fetch ===================
+fetchMovies(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`, trendingRow);
+fetchMovies(`https://api.themoviedb.org/3/movie/top_rated?api_key=${API_KEY}`, topRatedRow);
+fetchMovies(`https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}`, upcomingRow);
+fetchMovies(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=16`, animeRow); // Genre 16 = Animation
+
+// =================== Search ===================
+searchInput.addEventListener('keypress', async e => {
+  if(e.key === 'Enter') {
+    const query = searchInput.value;
+    trendingRow.innerHTML = '';
+    topRatedRow.innerHTML = '';
+    upcomingRow.innerHTML = '';
+    animeRow.innerHTML = '';
+    fetchMovies(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`, trendingRow);
+  }
+});
