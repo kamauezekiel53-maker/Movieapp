@@ -1,65 +1,39 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>MovieHub — Demo</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MovieHub – Netflix Style</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="navbar">
-    <div class="left">
-      <h1 class="logo">🎬 MovieHub</h1>
-      <nav>
-        <ul class="menu">
-          <li class="menu-item active">Home</li>
-          <li class="menu-item">TV Shows</li>
-          <li class="menu-item">Movies</li>
-        </ul>
-      </nav>
-    </div>
-    <div class="right">
-      <input id="searchInput" class="search" placeholder="Search movies..." />
-      <button id="searchBtn" class="icon-btn" aria-label="Search">🔍</button>
-    </div>
+  <header>
+    <h1>🎬 MovieHub</h1>
+    <input type="text" id="searchInput" placeholder="Search movies or series...">
   </header>
 
-  <!-- HERO -->
-  <section id="hero" class="hero">
-    <img id="hero-img" class="hero-bg" src="" alt="Hero backdrop" />
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-      <h2 id="hero-title">Loading...</h2>
-      <p id="hero-desc"></p>
-      <div class="hero-actions">
-        <button id="play-btn" class="play-btn">▶ Play</button>
-        <button id="more-btn" class="muted-btn">More Info</button>
-      </div>
-    </div>
+  <section class="movies-section">
+    <h2>Trending Now</h2>
+    <div class="movies-row" id="trendingRow"></div>
+
+    <h2>Top Rated</h2>
+    <div class="movies-row" id="topRatedRow"></div>
+
+    <h2>Action</h2>
+    <div class="movies-row" id="actionRow"></div>
+
+    <h2>Comedy</h2>
+    <div class="movies-row" id="comedyRow"></div>
   </section>
 
-  <!-- Rows -->
-  <main>
-    <section class="row">
-      <h3>Trending Now</h3>
-      <div class="row-container" id="trending"></div>
-    </section>
+  <!-- Trailer Modal -->
+  <div id="trailerModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <video id="trailerVideo" controls autoplay></video>
+    </div>
+  </div>
 
-    <section class="row">
-      <h3>Top Rated</h3>
-      <div class="row-container" id="toprated"></div>
-    </section>
-
-    <section class="row">
-      <h3>Action Movies</h3>
-      <div class="row-container" id="action"></div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <small>Data provided by TMDB</small>
-  </footer>
-
-  <script src="app.js" defer></script>
+  <script src="app.js"></script>
 </body>
 </html>
