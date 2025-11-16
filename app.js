@@ -31,7 +31,7 @@ const CONFIG = {
   MAX_CACHE_ITEMS: 120
 };
 
-if (!CONFIG.TMDB_KEY || CONFIG.TMDB_KEY === "YOUR_TMDB_API_KEY") {
+if (!CONFIG.TMDB_KEY || CONFIG.TMDB_KEY === "7cc9abef50e4c94689f48516718607be") {
   console.warn("TMDB API key not provided. Replace CONFIG.TMDB_KEY in app.js with your TMDB key.");
 }
 
