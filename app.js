@@ -10,10 +10,18 @@ async function fetchMovies(query = 'popular') {
     
     try {
         const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`API Error: ${response.status} - Check your API key or network.`);
+        }
         const data = await response.json();
+        if (data.results.length === 0) {
+            alert('No movies found. Try a different search!');
+            return;
+        }
         displayMovies(data.results);
     } catch (error) {
         console.error('Error fetching movies:', error);
+        alert('Failed to load movies. Check console for details.');
     }
 }
 
@@ -23,7 +31,7 @@ function displayMovies(movies) {
         const movieEl = document.createElement('div');
         movieEl.classList.add('movie');
         movieEl.innerHTML = `
-            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+            <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}" onerror="this.src='https://via.placeholder.com/200x300?text=No+Image'">
             <h3>${movie.title}</h3>
             <p>Rating: ${movie.vote_average}/10</p>
             <p>${movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</p>
