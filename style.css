@@ -1,63 +1,87 @@
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    font-family: 'Arial', sans-serif;
+    background: #000;  /* Dark background for a movie theater feel */
+    color: white;
+    min-height: 100vh;
 }
 
 header {
-    background-color: #333;
-    color: white;
-    padding: 1rem;
     text-align: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 2px solid #ff6b6b;  /* Subtle red accent */
 }
 
-header input {
-    padding: 0.5rem;
-    width: 60%;
-    max-width: 400px;
-    margin-right: 0.5rem;
+h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #ff6b6b;  /* Red for movie vibe */
 }
 
-header button {
-    padding: 0.5rem 1rem;
-    background-color: #e50914;
+#search {
+    padding: 10px;
+    width: 300px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    margin: 10px;
+    font-size: 1em;
+    background: #222;
+    color: white;
+}
+
+#searchBtn {
+    padding: 10px 20px;
+    background: #ff6b6b;
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background 0.3s;
 }
 
-header button:hover {
-    background-color: #b20710;
+#searchBtn:hover {
+    background: #ff5252;
 }
 
-#movie-container {
+#movies {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    padding: 2rem;
+    padding: 20px;
 }
 
 .movie {
-    background-color: white;
-    margin: 1rem;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    width: 250px;
+    background: rgba(255, 255, 255, 0.05);
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    width: 200px;
     text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    border: 1px solid #333;
+}
+
+.movie:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
 }
 
 .movie img {
     width: 100%;
-    height: auto;
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 .movie h3 {
-    margin: 0.5rem 0;
+    margin: 10px 0;
+    font-size: 1.2em;
+    color: #ff6b6b;
 }
 
 .movie p {
-    margin: 0.5rem 0;
+    margin: 5px 0;
+    font-size: 0.9em;
+    color: #ccc;
 }
