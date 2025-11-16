@@ -1,126 +1,134 @@
-const API_KEY='7cc9abef50e4c94689f48516718607be';
-const IMG_URL='https://image.tmdb.org/t/p/w500';
-const moviesRow=document.getElementById('moviesRow');
-const seriesRow=document.getElementById('seriesRow');
-const animeRow=document.getElementById('animeRow');
-const searchInput=document.getElementById('searchInput');
-const modal=document.getElementById('modal');
-const modalTitle=document.getElementById('modalTitle');
-const player=document.getElementById('player');
-const trailerContainer=document.getElementById('trailerContainer');
-const playerButtons=document.getElementById('playerButtons');
-const addFavoriteBtn=document.getElementById('addFavorite');
-const closeModal=document.querySelector('.close');
-const toggleTheme=document.getElementById('toggleTheme');
+// Put this file as app.js
+// TMDB API key you gave:
+const API_KEY = '7cc9abef50e4c94689f48516718607be';
+const IMAGE_W500 = 'https://image.tmdb.org/t/p/w500';
+const IMAGE_ORIG = 'https://image.tmdb.org/t/p/original';
 
-let favorites=JSON.parse(localStorage.getItem('moviehub_favorites'))||[];
+// DOM refs
+const heroImg = document.getElementById('hero-img');
+const heroTitle = document.getElementById('hero-title');
+const heroDesc = document.getElementById('hero-desc');
+const playBtn = document.getElementById('play-btn');
 
-async function fetchTMDB(type,category='trending',extraParams=''){
-  const url=`https://api.themoviedb.org/3/trending/${type}/week?api_key=${API_KEY}${extraParams}`;
-  const res=await fetch(url); const data=await res.json(); return data.results;
+const trendingRow = document.getElementById('trending');
+const topRatedRow = document.getElementById('toprated');
+const actionRow = document.getElementById('action');
+
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+
+// Small helper for fetch
+async function tmdbFetch(path, params = {}) {
+  const url = new URL(`https://api.themoviedb.org/3${path}`);
+  url.searchParams.set('api_key', API_KEY);
+  Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`TMDB error ${res.status}`);
+  return res.json();
 }
 
-function displayRow(items,container){
-  container.innerHTML='';
-  items.forEach(movie=>{
-    const div=document.createElement('div'); div.className='movie';
-    div.innerHTML=`
-      <img data-src="${movie.poster_path?IMG_URL+movie.poster_path:'https://via.placeholder.com/300x450?text=No+Image'}" alt="${movie.title||movie.name}" class="lazy">
-      <div class="movie-info">${movie.title||movie.name}</div>
-      ${movie.vote_average?'<div class="star-rating">'+movie.vote_average.toFixed(1)+'⭐</div>':''}
-      ${favorites.some(f=>f.id===movie.id)?'<div class="badge">❤️</div>':''}
-    `;
-    div.onclick=()=>openModal(movie);
-    container.appendChild(div);
-  });
-  lazyLoadImages();
-}
+// Fetch & render initial data
+async function init() {
+  try {
+    // trending (TMDB "popular")
+    const trending = await tmdbFetch('/movie/popular', { language: 'en-US', page: 1 });
+    renderRow(trendingRow, trending.results);
 
-// Lazy loading
-function lazyLoadImages(){
-  const lazyImages=document.querySelectorAll('.lazy');
-  const observer=new IntersectionObserver((entries)=>{
-    entries.forEach(entry=>{
-      if(entry.isIntersecting){
-        const img=entry.target; img.src=img.dataset.src;
-        observer.unobserve(img);
-      }
-    });
-  });
-  lazyImages.forEach(img=>observer.observe(img));
-}
+    // top rated
+    const toprated = await tmdbFetch('/movie/top_rated', { language: 'en-US', page: 1 });
+    renderRow(topRatedRow, toprated.results);
 
-// Modal
-async function openModal(movie){
-  modalTitle.textContent=movie.title||movie.name;
-  player.src=''; trailerContainer.innerHTML=''; playerButtons.innerHTML='';
+    // action (discover by genre id 28 = Action)
+    const action = await tmdbFetch('/discover/movie', { with_genres: '28', sort_by: 'popularity.desc', language:'en-US', page:1 });
+    renderRow(actionRow, action.results);
 
-  // Trailer fallback
-  const res=await fetch(`https://api.themoviedb.org/3/${movie.media_type||'movie'}/${movie.id}/videos?api_key=${API_KEY}`);
-  const data=await res.json();
-  const trailer=data.results.find(v=>v.type==='Trailer'&&v.site==='YouTube');
-  if(trailer) trailerContainer.innerHTML=`<iframe src="https://www.youtube.com/embed/${trailer.key}" allowfullscreen></iframe>`;
-
-  if(movie.media_type==='tv'){
-    const seasonSelect=document.createElement('select');
-    for(let i=1;i<=movie.number_of_seasons;i++){
-      const opt=document.createElement('option'); opt.value=i; opt.textContent='Season '+i;
-      seasonSelect.appendChild(opt);
-    }
-    playerButtons.appendChild(seasonSelect);
-    const epContainer=document.createElement('div'); epContainer.id='episodesContainer'; epContainer.style.marginTop='10px';
-    playerButtons.appendChild(epContainer);
-
-    const loadEpisodes=async(seasonNum)=>{
-      epContainer.innerHTML='Loading episodes...';
-      const epRes=await fetch(`https://api.themoviedb.org/3/tv/${movie.id}/season/${seasonNum}?api_key=${API_KEY}`);
-      const epData=await epRes.json(); epContainer.innerHTML='';
-      epData.episodes.forEach(ep=>{
-        const btn=document.createElement('button'); btn.textContent=`E${ep.episode_number}: ${ep.name}`; btn.style.margin='2px';
-        btn.onclick=()=>playEpisode(movie.id,seasonNum,ep.episode_number);
-        epContainer.appendChild(btn);
-      });
-    }
-    seasonSelect.addEventListener('change', e=>loadEpisodes(e.target.value));
-    loadEpisodes(1);
-  } else {
-    const btn=document.createElement('button'); btn.textContent='Play (provider unavailable)';
-    btn.onclick=()=>alert('Movie playback unavailable. Watch trailer above!');
-    playerButtons.appendChild(btn);
+    // hero - pick the first trending movie with a backdrop
+    const heroMovie = trending.results.find(m => m.backdrop_path) || trending.results[0];
+    renderHero(heroMovie);
+  } catch (err) {
+    console.error(err);
+    heroTitle.innerText = 'Failed to load movies';
+    heroDesc.innerText = '';
   }
-
-  addFavoriteBtn.onclick=()=>addFavorite(movie);
-  modal.style.display='flex';
 }
 
-function playEpisode(tvId,season,episode){player.src=`https://vidsrc.to/embed/tv/${tvId}/season/${season}/episode/${episode}`;}
-
-function addFavorite(movie){
-  if(!favorites.some(f=>f.id===movie.id)){
-    favorites.push(movie); localStorage.setItem('moviehub_favorites',JSON.stringify(favorites));
-    alert('Added to favorites!'); init();
-  } else alert('Already in favorites!');
+// Render one horizontal row of posters
+function renderRow(container, movies = []) {
+  container.innerHTML = '';
+  movies.forEach(movie => {
+    const img = document.createElement('img');
+    img.className = 'poster';
+    img.alt = movie.title || movie.name;
+    img.loading = 'lazy';
+    img.src = movie.poster_path ? IMAGE_W500 + movie.poster_path : '';
+    img.addEventListener('click', () => onPosterClick(movie));
+    container.appendChild(img);
+  });
 }
 
-document.getElementById('viewFavorites').onclick=()=>displayRow(favorites,moviesRow);
-searchInput.addEventListener('keyup', e=>{if(e.key==='Enter'){const query=e.target.value.trim(); if(query) searchTMDB(query);}});
-
-async function searchTMDB(query){
-  const res=await fetch(`https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
-  const data=await res.json(); displayRow(data.results,moviesRow);
+// Hero rendering & play button handler
+function renderHero(movie) {
+  if (!movie) return;
+  heroImg.src = movie.backdrop_path ? IMAGE_ORIG + movie.backdrop_path : (movie.poster_path ? IMAGE_W500 + movie.poster_path : '');
+  heroTitle.innerText = movie.title || movie.name;
+  heroDesc.innerText = movie.overview ? truncate(movie.overview, 220) : 'No description available.';
+  playBtn.onclick = () => openMovieTrailer(movie.id, movie.title || movie.name);
 }
 
-// Close modal
-closeModal.onclick=()=>{modal.style.display='none';player.src='';};
-window.onclick=e=>{if(e.target===modal){modal.style.display='none';player.src='';}};
-
-// Dark/light toggle
-toggleTheme.onclick=()=>{document.body.classList.toggle('light');};
-
-// Init
-async function init(){
-  const movies=await fetchTMDB('movie'); displayRow(movies,moviesRow);
-  const series=await fetchTMDB('tv'); displayRow(series,seriesRow);
-  const anime=await fetchTMDB('tv','trending','&with_genres=16'); displayRow(anime,animeRow);
+// Clicking a poster shows hero details for that movie
+function onPosterClick(movie) {
+  renderHero(movie);
+  // scroll window up to hero on small screens
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+// Open trailer using TMDB videos -> prefer YouTube trailer (will open new tab)
+async function openMovieTrailer(movieId, title = '') {
+  try {
+    const data = await tmdbFetch(`/movie/${movieId}/videos`, { language: 'en-US' });
+    // prefer trailers with type "Trailer" and site "YouTube"
+    const trailer = data.results.find(v => v.site === 'YouTube' && v.type === 'Trailer') || data.results.find(v => v.site === 'YouTube');
+    if (trailer) {
+      const YOUTUBE = `https://www.youtube.com/watch?v=${trailer.key}`;
+      window.open(YOUTUBE, '_blank');
+    } else {
+      alert('Trailer not available. Opening movie page on TMDB.');
+      window.open(`https://www.themoviedb.org/movie/${movieId}`, '_blank');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Failed to fetch trailer.');
+  }
+}
+
+function truncate(text, n) {
+  return text && text.length > n ? text.slice(0, n-1) + '…' : text;
+}
+
+/* Search functionality */
+searchBtn.addEventListener('click', onSearch);
+searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') onSearch(); });
+
+async function onSearch() {
+  const q = searchInput.value.trim();
+  if (!q) return;
+  try {
+    const results = await tmdbFetch('/search/movie', { query: q, language:'en-US', page:1, include_adult:false });
+    // show results in trending row (quick UX)
+    if (results.results.length) {
+      renderRow(trendingRow, results.results);
+      // set first as hero
+      const first = results.results.find(m => m.backdrop_path) || results.results[0];
+      if (first) renderHero(first);
+      window.scrollTo({ top: 420, behavior: 'smooth' });
+    } else {
+      alert('No results found.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Search failed.');
+  }
+}
+
+// Initialize
 init();
