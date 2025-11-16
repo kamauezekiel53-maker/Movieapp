@@ -36,6 +36,16 @@ header input {
   border: none;
 }
 
+header button {
+  margin-left: 10px;
+  padding: 8px 12px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
 .movies-section {
   padding: 20px;
 }
@@ -53,8 +63,8 @@ header input {
   border-radius: 6px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform 0.2s;
   position: relative;
+  transition: transform 0.2s;
 }
 
 .movie-card:hover {
@@ -72,6 +82,21 @@ header input {
   text-align: center;
 }
 
+/* Watchlist heart icon */
+.movie-card .heart {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1.5em;
+  color: white;
+  cursor: pointer;
+  text-shadow: 1px 1px 5px black;
+}
+
+.movie-card .heart.active {
+  color: var(--accent);
+}
+
 /* Modal styles */
 .modal {
   display: none;
@@ -81,7 +106,7 @@ header input {
   top: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.85);
   justify-content: center;
   align-items: center;
 }
@@ -89,18 +114,21 @@ header input {
 .modal-content {
   position: relative;
   width: 80%;
-  max-width: 800px;
+  max-width: 900px;
+  background: var(--bg);
+  padding: 20px;
+  border-radius: 8px;
 }
 
-.modal video {
+.modal video, .modal iframe {
   width: 100%;
   border-radius: 8px;
 }
 
-.close {
+.close, .close-watchlist {
   position: absolute;
-  top: -10px;
-  right: 0;
+  top: 0;
+  right: 10px;
   font-size: 2em;
   color: var(--accent);
   cursor: pointer;
