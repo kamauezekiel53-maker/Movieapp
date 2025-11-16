@@ -1,24 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Movie Hub</title>
   <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <button id="themeToggle" class="icon-btn" title="Toggle dark / light">🌗</button>
+        <h1>🎬 Movie Hub</h1>
+      </div>
 
-  <header>
-    <h1>🎬 Movie Hub</h1>
-    <form id="searchForm">
-      <input id="searchInput" type="text" placeholder="Search movies..." />
-      <button type="submit">Search</button>
-    </form>
-  </header>
+      <div class="controls">
+        <div class="search-wrap">
+          <input id="searchInput" placeholder="Search movies..." autocomplete="off" />
+          <div id="suggestions" class="suggestions hidden"></div>
+        </div>
 
-  <section id="movies" class="movie-grid"></section>
+        <div class="section-buttons">
+          <button class="sec-btn active" data-sec="popular">Popular</button>
+          <button class="sec-btn" data-sec="trending">Trending</button>
+          <button class="sec-btn" data-sec="now_playing">Now Playing</button>
+          <button class="sec-btn" data-sec="top_rated">Top Rated</button>
+        </div>
 
-  <script src="app.js"></script>
+        <div class="options">
+          <label class="small">Theme</label>
+          <select id="colorTheme">
+            <option value="vibrant">Vibrant</option>
+            <option value="sunset">Sunset</option>
+            <option value="ocean">Ocean</option>
+            <option value="neo">Neo</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div id="loader" class="loader hidden" aria-hidden="true">
+        <div class="dot-roller"><div></div><div></div><div></div><div></div></div>
+      </div>
+
+      <section class="content">
+        <div id="moviesGrid" class="movie-grid"></div>
+        <div class="pager">
+          <button id="prevPage" class="pager-btn" disabled>◀ Prev</button>
+          <span id="pageInfo">Page 1</span>
+          <button id="nextPage" class="pager-btn">Next ▶</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <small>Movie Hub · Data from The Movie Database (TMDb)</small>
+    </footer>
+  </div>
+
+  <!-- Details Modal -->
+  <div id="modal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content" role="dialog" aria-modal="true">
+      <button id="modalClose" class="modal-close" title="Close">✕</button>
+      <div class="modal-body">
+        <div class="modal-poster">
+          <img id="modalPoster" src="" alt="" />
+        </div>
+        <div class="modal-info">
+          <h2 id="modalTitle"></h2>
+          <p class="meta-line" id="modalSub"></p>
+          <p id="modalOverview"></p>
+          <div id="modalCast" class="cast-row"></div>
+
+          <div id="modalVideos" class="video-row"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" type="module"></script>
 </body>
 </html>
